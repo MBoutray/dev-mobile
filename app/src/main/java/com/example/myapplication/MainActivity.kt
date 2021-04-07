@@ -10,6 +10,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
+    private var input: Float? = null
+    private var rawInput: String = ""
+    private var previousInput: Float? = null
+    private var symbol: String? = null
+    private var history: Float? = null
 
     companion object {
         private val INPUT_BUTTONS = listOf(
@@ -49,11 +54,6 @@ class MainActivity : AppCompatActivity() {
             )
         }
     }
-
-    private var input: Float? = null
-    private var rawInput: String = ""
-    private var previousInput: Float? = null
-    private var symbol: String? = null
 
     private fun onCellClicked(value: String) {
         when {
@@ -98,15 +98,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//    private fun onDotClicked() {
-//        input
-//    }
-
     private fun onSymbolClicked(symbol: String) {
         this.symbol = symbol
-        previousInput = input
-        input = null
-        rawInput = ""
+
+        if (!rawInput.isEmpty()) {
+            previousInput = input
+            input = null
+            rawInput = ""
+        } else {
+            previousInput = history
+        }
+
     }
 
     private fun onEqualsClicked() {
@@ -118,7 +120,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        updateDisplayContainer(when (symbol) {
+        val display = updateDisplayContainer(when (symbol) {
             "+" -> previousInput!! + input!!
             "-" -> previousInput!! - input!!
             "*" -> previousInput!! * input!!
@@ -126,12 +128,15 @@ class MainActivity : AppCompatActivity() {
             else -> "ERROR"
         })
 
+        history = if (display == "ERROR") null else display.toFloat()
+
         resetVariables()
     }
 
-    private fun updateDisplayContainer(value: Any?) {
+    private fun updateDisplayContainer(value: Any?) : String {
         val displayValue = if(value != null) value.toString() else ""
         findViewById<TextView>(R.id.calculator_display_container).text = displayValue
+        return displayValue
     }
 
     private fun resetVariables() {
