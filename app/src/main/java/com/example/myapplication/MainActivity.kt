@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             value.isNum() -> {
                 rawInput += value
                 input = rawInput.toFloat()
-                updateDisplayContainer(input!!)
+                updateDisplayContainer(input)
             }
             value == "=" -> onEqualsClicked()
             value == "." -> {
@@ -68,23 +68,31 @@ class MainActivity : AppCompatActivity() {
 
                 rawInput += value
                 input = rawInput.toFloat()
-                updateDisplayContainer(input!!)
+                updateDisplayContainer(input)
             }
             value == "C" -> {
-                if (rawInput.length <= 0) return
+                //If there is nothing entered yet, exit
+                if (rawInput.isEmpty()) return
 
+                //Remove the last char from the right of the string
                 rawInput = rawInput.substring(0, rawInput.length - 1)
-                if (rawInput.length == 0) {
+
+                //Change the actual input accordingly
+                if (rawInput.isEmpty()) {
                     input = null
                 } else {
                     input = rawInput.toFloat()
                 }
-                updateDisplayContainer(input!!)
+
+                //Update display
+                updateDisplayContainer(input)
             }
             value == "CE" -> {
-                rawInput = ""
-                input = null
-                updateDisplayContainer(input!!)
+                //Remove everything
+                resetVariables()
+
+                //Update display
+                updateDisplayContainer(input)
             }
             listOf("/", "*", "-", "+").contains(value) -> onSymbolClicked(value)
         }
@@ -121,8 +129,9 @@ class MainActivity : AppCompatActivity() {
         resetVariables()
     }
 
-    private fun updateDisplayContainer(value: Any) {
-        findViewById<TextView>(R.id.calculator_display_container).text = value.toString()
+    private fun updateDisplayContainer(value: Any?) {
+        val displayValue = if(value != null) value.toString() else ""
+        findViewById<TextView>(R.id.calculator_display_container).text = displayValue
     }
 
     private fun resetVariables() {
