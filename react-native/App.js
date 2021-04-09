@@ -15,9 +15,10 @@ class ReactCalculator extends Component {
     super(props);
 
     this.state = {
-      previousInputValue: 0,
       inputValue: 0,
+      previousInputValue: 0,
       selectedSymbol: null,
+      displayValue: 0,
       isFloating: false
     }
   }
@@ -26,7 +27,7 @@ class ReactCalculator extends Component {
     return (
       <View style={Style.rootContainer}>
         <View style={Style.displayContainer}>
-          <Text style={Style.displayText}>{this.state.inputValue}</Text>
+          <Text style={Style.displayText}>{this.state.displayValue}</Text>
         </View>
         <View style={Style.inputContainer}>
           {this._renderInputButtons()}
@@ -76,7 +77,8 @@ class ReactCalculator extends Component {
     let inputValue = this.state.isFloating ? this.state.inputValue + (num * 0.1) : (this.state.inputValue * 10) + num;
 
     this.setState({
-      inputValue
+      inputValue,
+      displayValue: inputValue
     })
   }
 
@@ -87,9 +89,10 @@ class ReactCalculator extends Component {
       case '+':
       case '-':
         this.setState({
-          selectedSymbol: str,
-          previousInputValue: this.state.inputValue,
           inputValue: 0,
+          previousInputValue: this.state.inputValue,
+          selectedSymbol: str,
+          displayValue: str,
           isFloating: false
         });
         break;
@@ -106,11 +109,22 @@ class ReactCalculator extends Component {
         if(!symbol) {
           return;
         }
+        if(symbol == '/' && inputValue == 0) {
+          this.setState({
+            inputValue: 0,
+            previousInputValue: 0,
+            selectedSymbol: null,
+            displayValue: "ERROR",
+            isFloating: false
+          });
+          return;
+        }
 
         this.setState({
+          inputValue: 0,
           previousInputValue: 0,
-          inputValue: eval(previousInputValue + symbol + inputValue),
           selectedSymbol: null,
+          displayValue: eval(previousInputValue + symbol + inputValue),
           isFloating: false
         });
         
