@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -7,7 +8,7 @@ class AppColors {
   static const Color white = Color(0xFFFFFFFF);
   static const Color displayContainerBackground = Color(0xFF3E606F);
   static const Color inputContainerBackground = Color(0xFF193441);
-} 
+}
 
 void main() {
   runApp(MyApp());
@@ -35,18 +36,19 @@ class Calculator extends StatefulWidget {
 
 class _CalculatorState extends State<Calculator> {
   static const List<List<String>> grid = <List<String>>[
+    <String>["C", "CE", "", ""],
     <String>["7", "8", "9", "-"],
     <String>["4", "5", "6", "*"],
     <String>["1", "2", "3", "/"],
-    <String>["0", ".", "=", "+"],
+    <String>[".", "0", "=", "+"],
   ];
 
   double? input;
   double? previousInput;
   String? symbol;
   bool isResultShowing = false;
-  
-  
+  bool isFloating = false;
+
   void onItemClicked(String value) {
     print('On Click $value');
 
@@ -69,6 +71,15 @@ class _CalculatorState extends State<Calculator> {
       case '*':
         onNewSymbol(value);
         break;
+      case '.':
+        onNewDot();
+        break;
+      case 'C':
+        reset();
+        break;
+      case 'CE':
+        resetAll();
+        break;
       case '=':
         onEquals();
     }
@@ -78,46 +89,85 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void onNewDigit(String digit) {
-    if(isResultShowing) {
-      input = 0;
-      isResultShowing = true;
+    if (this.isResultShowing) {
+      this.input = 0;
+      this.isResultShowing = true;
     }
-    if(input == null) {
-      input = 0;
+    if (this.input == null) {
+      this.input = 0;
     }
-    
-    input = input! * 10 + double.parse(digit);
+
+    List<String> splitInputValue = this.input.toString().split('.');
+    int doubleDigitCount =
+        splitInputValue.length > 1 ? splitInputValue[1].length : 0;
+
+    this.input = this.isFloating
+        ? double.parse((this.input! + (double.parse(digit) * pow(0.1, doubleDigitCount + 1))).toStringAsFixed(doubleDigitCount + 1))
+        : (this.input! * 10) + double.parse(digit);
   }
 
   void onNewSymbol(String digit) {
-    symbol = digit;
-    previousInput = input;
-    input = 0;
+    this.symbol = digit;
+    this.previousInput = this.input;
+    this.input = 0;
+    this.isFloating = false;
+  }
+
+  void onNewDot() {
+    this.isFloating = true;
+  }
+
+  void reset() {
+    if (this.isFloating) {
+      int floatingDigitsCount = this.input.toString().split('.')[1].length;
+      String inputValue = this.input.toString();
+
+      this.input = double.parse(inputValue.substring(0, inputValue.length - 1));
+
+      if (floatingDigitsCount == 1) {
+        this.isFloating = false;
+      }
+    } else {
+      this.input = (input! / 10).floor().toDouble();
+    }
+  }
+
+  void resetAll() {
+    this.input = null;
+    this.previousInput = null;
+    this.symbol = null;
+    this.isResultShowing = false;
+    this.isFloating = false;
   }
 
   void onEquals() {
-    if(previousInput == null || input == null || symbol == null) {
-		return;
-		}
-    
-    switch(symbol) {
+    if (this.previousInput == null || this.input == null || this.symbol == null) {
+      return;
+    }
+    if (this.input == 0 && this.symbol == '/') {
+      resetAll();
+      return;
+    }
+
+    switch (this.symbol) {
       case '+':
-        input = previousInput! + input!;
+        this.input = this.previousInput! + this.input!;
         break;
       case '-':
-        input = previousInput! - input!;
+        this.input = this.previousInput! - this.input!;
         break;
       case '/':
-        input = previousInput! / input!;
+        this.input = this.previousInput! / this.input!;
         break;
       case '*':
-        input = previousInput! * input!;
+        this.input = this.previousInput! * this.input!;
         break;
     }
-    
-    isResultShowing = true;
-    previousInput = null;
-    symbol = null;
+
+    this.isResultShowing = true;
+    this.previousInput = null;
+    this.symbol = null;
+    this.isFloating = false;
   }
 
   @override
