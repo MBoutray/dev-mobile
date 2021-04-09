@@ -7,7 +7,7 @@ class AppColors {
   static const Color white = Color(0xFFFFFFFF);
   static const Color displayContainerBackground = Color(0xFF3E606F);
   static const Color inputContainerBackground = Color(0xFF193441);
-}
+} 
 
 void main() {
   runApp(MyApp());
@@ -44,6 +44,7 @@ class _CalculatorState extends State<Calculator> {
   double? input;
   double? previousInput;
   String? symbol;
+  bool isResultShowing = false;
   
   
   void onItemClicked(String value) {
@@ -77,15 +78,46 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void onNewDigit(String digit) {
-    // TODO
+    if(isResultShowing) {
+      input = 0;
+      isResultShowing = true;
+    }
+    if(input == null) {
+      input = 0;
+    }
+    
+    input = input! * 10 + double.parse(digit);
   }
 
   void onNewSymbol(String digit) {
-    // TODO
+    symbol = digit;
+    previousInput = input;
+    input = 0;
   }
 
   void onEquals() {
-    // TODO
+    if(previousInput == null || input == null || symbol == null) {
+		return;
+		}
+    
+    switch(symbol) {
+      case '+':
+        input = previousInput! + input!;
+        break;
+      case '-':
+        input = previousInput! - input!;
+        break;
+      case '/':
+        input = previousInput! / input!;
+        break;
+      case '*':
+        input = previousInput! * input!;
+        break;
+    }
+    
+    isResultShowing = true;
+    previousInput = null;
+    symbol = null;
   }
 
   @override
