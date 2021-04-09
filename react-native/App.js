@@ -4,6 +4,7 @@ import Style from './src/Style';
 import InputButton from './src/InputButton';
 
 const inputButtons = [
+  ['C', 'CE', "", ""],
   [1, 2, 3, '/'],
   [4, 5, 6, '*'],
   [7, 8, 9, '-'],
@@ -74,7 +75,10 @@ class ReactCalculator extends Component {
   }
 
   _handleNumberInput(num) {
-    let inputValue = this.state.isFloating ? this.state.inputValue + (num * 0.1) : (this.state.inputValue * 10) + num;
+    let splitInputValue = this.state.inputValue.toString().split('.');
+    let floatingDigitCount = splitInputValue.length > 1 ? splitInputValue[1].length : 0;
+
+    let inputValue = this.state.isFloating ? parseFloat((this.state.inputValue + (num * Math.pow(0.1, floatingDigitCount + 1))).toFixed(floatingDigitCount + 1)) : (this.state.inputValue * 10) + num;
 
     this.setState({
       inputValue,
@@ -99,6 +103,38 @@ class ReactCalculator extends Component {
       case '.':
         this.setState({
           isFloating: true
+        });
+        break;
+      case 'C':
+        if(this.state.isFloating) {
+          let floatingDigitsCount = this.state.inputValue.toString().split('.')[1].length;
+          let inputValue = this.state.inputValue.toString();
+          inputValue = parseFloat(inputValue.substr(0, inputValue.length - 1))
+
+          this.setState({
+            inputValue,
+            displayValue: inputValue
+          });
+
+          if(floatingDigitsCount == 1) {
+            this.setState({
+              isFloating: false
+            });
+          }
+        } else {
+          this.setState({
+            inputValue: Math.floor(this.state.inputValue / 10),
+            displayValue: Math.floor(this.state.inputValue / 10)
+          });
+        }
+        break;
+      case 'CE':
+        this.setState({
+          inputValue: 0,
+          previousInputValue: 0,
+          selectedSymbol: null,
+          displayValue: 0,
+          isFloating: false
         });
         break;
       case '=':
